@@ -17,27 +17,28 @@ class Cursor{
         time = t;         
         type = k;
         if(type == 1){
-            ans = int(random(5));
+            ans = int(random(4));
+            //ans = 4;
             y = 700;         
             switch(ans){
                 case 0:
-                    img = loadImage("up.png");
+                    img = loadImage("down_up2.png");
                     break;
                     
                 case 1:
-                    img = loadImage("left.png");
+                    img = loadImage("down_left2.png");
                     break;
                     
                 case 2:
-                    img = loadImage("down.png");
+                    img = loadImage("down_down2.png");
                     break;
                 
                 case 3:
-                    img = loadImage("right.png");
+                    img = loadImage("down_right2.png");
                     break;
                 
                 case 4:
-                    img = loadImage("middle.png");
+                    img = loadImage("down_middle.png");
                     break;
             }
         }
@@ -45,25 +46,25 @@ class Cursor{
         else{
             //ans = int(random(4));
             ans = 0;
-            y = 400;
+            y = 450;
             switch(ans){
                 case 0:
-                    img = loadImage("pointer1.png");
+                    img = loadImage("up_up2.png");
                     break;
                     
                 case 1:
-                    img = loadImage("pointer2.png");
+                    img = loadImage("up_left2.png");
                     break; 
                     
                 case 2:
-                    img = loadImage("pointer3.png");
+                    img = loadImage("up_down2.png");
                     break;
                 
                 case 3:
-                    img = loadImage("pointer4.png");
+                    img = loadImage("up_right2.png");
                     break; 
             }
-        }     
+        }      
              
     }
     
@@ -72,7 +73,7 @@ class Cursor{
     }
     
     void move(){
-        x -= 40;  //not smooth, but fast
+        x -= 30;  //not smooth, but fast
     }
 } 
 
@@ -82,7 +83,7 @@ class Evaluate{
     
     Evaluate(int e){
         eval = e;
-        counter = 20;
+        counter = 15;
         if(e == 2){
             if(is_bonus)
                 score += 20;
@@ -99,39 +100,17 @@ class Evaluate{
     
     void draw(){
         if(counter > 0){
-            /*PImage eval_img;
             switch(eval){
             case 1:
-                eval_img = loadImage("bad.png");
-                image(eval_img, 1400, 100, 400, 200);
+                image(bad, 1400, 100);
                 break;
                 
             case 2:
-                eval_img = loadImage("normal.png");
-                image(eval_img, 1400, 100, 400, 200);
+                image(normal, 1400, 100);
                 break;
                 
             case 3:
-                eval_img = loadImage("excellent.png");
-                image(eval_img, 1400, 100, 400, 200);
-                break;
-                
-            default:
-                break;
-            }*/
-            textSize(32);
-            fill(#FF00FF);
-            switch(eval){
-            case 1:               
-                text("BAD", 1400, 100);
-                break;
-                
-            case 2:
-                text("NORMAL", 1400, 100);
-                break;
-                
-            case 3:
-                text("EXCELLENT", 1400, 100);
+                image(excellent, 1400, 100);
                 break;
                 
             default:
@@ -145,17 +124,18 @@ class Evaluate{
 boolean is_standby = true;
 boolean is_bonus = true;
 
-PImage backimage, logo, upper_bar, lower_bar, score_img, check_point, bonus;
+PImage backgnd_img1, backgnd_img2, logo, bonus;
+PImage up_up, up_left, up_down, up_right;
+PImage bad, normal, excellent;
 
-int index = 0;
 int prev = 0;
-
-int curr_cursor = 0;
 
 int score = 0;
 int combo;
 
 int map_size = 0;
+int index = 0;
+int curr_cursor = 0;
 
 int frame = 0;
 int fps_time = 0;
@@ -163,7 +143,7 @@ int frame_1_sec = 0;
 
 Evaluate evaluation;
 BufferedReader reader;
-Cursor[] map = new Cursor[20];  //change to beatmap file in the future
+Cursor[] map = new Cursor[100];  //change to beatmap file in the future
 LinkedList<Cursor> up_queue = new LinkedList<Cursor>();
 LinkedList<Cursor> down_queue = new LinkedList<Cursor>();
 
@@ -176,13 +156,20 @@ AudioPlayer down_sound = null;
 void img_init(){
     try{
         imageMode(CENTER);
-        backimage = loadImage("background.png"); //Make a beautiful background-image
+        backgnd_img2 = loadImage("background.png"); //Make a beautiful background-image
         logo = loadImage("logo.png");  //Make a beautiful logo image  
-        upper_bar = loadImage("upper_bar.png");
-        lower_bar = loadImage("lower_bar.png");
-        score_img = loadImage("score_img.png");
-        check_point = loadImage("check_point.png");
         bonus = loadImage("bonus.png");
+        backgnd_img1 = loadImage("background_1.png");
+        backgnd_img2 = loadImage("background_2.png"); 
+        
+        up_up = loadImage("up_up2.png");
+        up_left = loadImage("up_left2.png");
+        up_down = loadImage("up_down2.png");
+        up_right = loadImage("up_right2.png");
+        
+        bad = loadImage("bad.png");
+        normal = loadImage("normal.png");
+        excellent = loadImage("excellent.png");
     }
     catch(Exception e){
         println("Please check your png file integration");
@@ -226,55 +213,49 @@ void bgm_init(){
 
 void draw_background(){
     if(is_standby){  //standby page         
-        background(backimage);                   
-        image(logo, 800, 450);        
+        background(backgnd_img1);                    
         String any_key = "Please key space to start";
-        fill(0);
-        textSize(32);
-        textAlign(CENTER);
-        text(any_key, 800, 600); //Hope to create fading in out text
+        fill(#FFFFFF);
+        textSize(80);
+        textAlign(CENTER, CENTER);
+        text(any_key, 800, 450); //Hope to create fading in out text
     }
     
     else{      //gaming page
-        if(is_bonus){            
-            background(#FFFFFF);
-            image(bonus, 800, 100);
+        if(is_bonus){
+            background(backgnd_img2);
+            image(bonus, 800, 100);            
         }
+
         else{
-            background(#FFFFFF);
-        }            
-        //image(upper_bar, 800, 400, 1600, 200); 
-        //image(lower_bar, 800, 700, 1600, 200);  
-        //image(check_point, 400, 700, 200, 200);
-        //image(score_img, 150, 75, 300, 150);            
+            background(backgnd_img2);
+        }                    
     }
     //draw_fps();
 }
 
 void draw_cursor(){
-    PImage img;
     switch(curr_cursor){
         case 0:
-            img = loadImage("pointer1.png");
+            image(up_up, 400, 450, 200, 200); 
             break;
             
         case 1:
-            img = loadImage("pointer2.png");
+            image(up_left, 400, 450, 200, 200); 
             break; 
             
         case 2:
-            img = loadImage("pointer3.png");
+            image(up_down, 400, 450, 200, 200); 
             break;
         
         case 3:
-            img = loadImage("pointer4.png");
+            image(up_right, 400, 450, 200, 200); 
             break; 
             
         default:
-            img = loadImage("pointer1.png");
+            image(up_up, 400, 450, 200, 200); 
             break;
     }
-    image(img, 400, 400, 200, 200);  
     
     for(int i=0;i<up_queue.size();i++){
         up_queue.get(i).draw();
@@ -298,12 +279,10 @@ void move_cursor(){                        //move all cursor
         if(up_queue.element().x <= 400){
             if(up_queue.element().ans != curr_cursor){  //remove up cursors
                 evaluation = new Evaluate(1);
-                //println("bad");
                 combo = 0;
             }
             else{
                 evaluation = new Evaluate(3);
-                //println("excellent");
                 up_sound.rewind();
                 up_sound.play();               
                 combo++;
@@ -316,7 +295,6 @@ void move_cursor(){                        //move all cursor
         if(down_queue.element().x <= 100){
             down_queue.remove();
             evaluation = new Evaluate(1);
-            //println("bad");  
             combo = 0;
         }
     }
@@ -324,23 +302,22 @@ void move_cursor(){                        //move all cursor
 
 void draw_score(){
     //println(score);
-    fill(0, 102, 153);
+    fill(0);
+    textSize(48);
     text(score, 400, 75);
     if(combo > 0)
-      text(combo + " combo", 400, 175);
+    text(combo + " combo", 400, 175);
 }
 
 void chk_down_res(int res){
     if(down_queue.size()>0){  //not sensitive at all!
         if(down_queue.element().x < 550 && down_queue.element().x > 250){
             if(down_queue.element().ans == res){
-                //println("excellent");
                 down_queue.remove();
                 evaluation = new Evaluate(3);
                 combo++;
             }
             else{
-                //println("bad");
                 down_queue.remove();
                 evaluation = new Evaluate(1);
                 combo = 0;
@@ -348,13 +325,11 @@ void chk_down_res(int res){
         }         
         else if(down_queue.element().x < 700 && down_queue.element().x > 100){
             if(down_queue.element().ans == res){
-                //println("normal");
                 down_queue.remove();
                 evaluation = new Evaluate(2);
                 combo++;
             }
             else{
-                //println("bad");
                 down_queue.remove();
                 evaluation = new Evaluate(1);
                 combo = 0;
@@ -404,22 +379,6 @@ void read_port(){
     }
 }
 
-void setup(){
-    //port_init();
-    img_init();
-    bgm_init();
-    //play main page music
-    
-    size(1600, 900);
-    frameRate(30);  //Actually in game it would only 10~20 fps
- 
-    /*for(int i=0;i<20;i++){              //testing beatmap
-        map[i] = new Cursor(int(random(0,2)), i*500 + 1100);
-    }*/
-    
-    evaluation = new Evaluate(4);   //initalize score obj
-}
-
 void draw_true_fps(){
      frame++;
     if(millis() - fps_time >= 1000){
@@ -431,6 +390,22 @@ void draw_true_fps(){
 
 }
 
+void setup(){
+    //port_init();
+    img_init();
+    bgm_init();
+    //play main page music
+    
+    size(1600, 900);
+    frameRate(40);  //Actually in game it would only 10~20 fps
+ 
+    /*for(int i=0;i<20;i++){              //testing beatmap
+        map[i] = new Cursor(int(random(0,2)), i*500 + 1100);
+    }*/
+    
+    evaluation = new Evaluate(4);   //initalize score obj
+}
+
 void draw_fps(){
     /*frame++;
     if(millis() - fps_time >= 1000){
@@ -438,22 +413,17 @@ void draw_fps(){
         frame_1_sec = frame;       
         frame = 0;
     }*/
-    fill(#FF0000);
+    fill(#FFFFFF);
     textSize(32);
     text("FPS: " + int(frameRate), 150, 850);
 }
 
-int frame_time = 0;
-
 void draw(){  //main function of this program        
     draw_background();
     if(!is_standby){    //gaming mode
-        background(#FFFFFF);
+        update_queue();
         move_cursor(); 
-            //TODO: delay need to be solved
-        image(check_point, 400, 700, 200, 200);
-        draw_cursor();
-        update_queue();        
+        draw_cursor();                
         draw_true_fps();
         evaluation.draw();
         draw_score();
