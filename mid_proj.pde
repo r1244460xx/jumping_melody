@@ -102,15 +102,15 @@ class Evaluate{
         if(counter > 0){
             switch(eval){
             case 1:
-                image(bad, 1400, 100);
+                image(bad, 1350, 100);
                 break;
                 
             case 2:
-                image(normal, 1400, 100);
+                image(normal, 1350, 100);
                 break;
                 
             case 3:
-                image(excellent, 1400, 100);
+                image(excellent, 1350, 100);
                 break;
                 
             default:
@@ -173,7 +173,7 @@ void img_init(){
     }
     catch(Exception e){
         println("Please check your png file integration");
-        stop();
+        to_menu();
     }
 }
 
@@ -183,7 +183,7 @@ void port_init(){
     }
     catch(Exception e){
         println("Please check your serial connection");
-        stop();  
+        to_menu();  
     }
 }
 
@@ -350,10 +350,11 @@ void update_queue(){
     }                  
 }
 
-void stop(){
+void to_menu(){
     //port.stop();
     //minim.stop();
-    //player.close();
+    player.pause();
+    player.rewind();
 } 
 
 void read_port(){
@@ -427,6 +428,7 @@ void draw(){  //main function of this program
         draw_true_fps();
         evaluation.draw();
         draw_score();
+        
         player.play();
         draw_fps();   
         //read_port();   
@@ -481,6 +483,7 @@ void keyReleased() {
     switch(key){
         case 'q':
             is_standby = true;
+            to_menu();
             break;
             
         case ' ':
