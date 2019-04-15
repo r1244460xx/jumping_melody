@@ -4,110 +4,150 @@ import gifAnimation.*;
 import ddf.minim.*;
 import java.util.LinkedList;
 
-class Cursor {
+class Beat {
+    static final int size = 200;
     public int x;
     public int y;
     public int ans;
     public int time;
-    public int type;
-    //public int tick;
-    
-    Cursor(int k, int t) {
-        x = 1600;
-        time = t;         
-        type = k;
-        //tick = 0;
-        if(type == 1) {
-            ans = int(random(4));
-            y = 700;    
-        }           
-        else {
-            //ans = int(random(4));
-            ans = 0;
-            y = 450;
-        }                  
+    public int effect;    
+ 
+    Beat() {
     }
-    
-    void draw() {      //draw map as the current position
-        if(type == 0) {
-            switch(ans) {
-                case 0:
-                    image(up_up, x, y, 200, 200);
-                    break;
-                
-                case 1:
-                    image(up_left, x, y, 200, 200);
-                    break;
-                
-                case 2:
-                    image(up_down, x, y, 200, 200);
-                    break;
-                
-                case 3:
-                    image(up_right, x, y, 200, 200);
-                    break;
-            }
-        }        
-        else {
-            switch(ans) {
-                case 0:
-                    image(down_up, x, y, 200, 200);
-                    break;
-                
-                case 1:
-                    image(down_left, x, y, 200, 200);
-                    break;
-                
-                case 2:
-                    image(down_down, x, y, 200, 200);
-                    break;
-                
-                case 3:
-                    image(down_right, x, y, 200, 200);
-                    break;
-            }
-        }
-    }
-    
+       
     void move() {
-        x -= cursor_step;  //not smooth, but fast
+        x = width - int((Game.distance / Game.speed) * ((millis() - game.start_time) - (time - Game.speed)));
     }
 } 
 
-class Evaluate {
-    public int counter;
-    public int eval;
+class Volume extends Beat {
+    static final int chk_x = 400;
+    static final int chk_y = 450;
+    static final int up = 0;
+    static final int left = 1;
+    static final int down = 2;
+    static final int right = 3;
     
-    Evaluate(int e) {
-        eval = e;
+    Volume(int t, int e) {
+        x = width;         
+        time = t;
+        ans = int(random(4));
+        ans = 0;
+        y = chk_y;  
+        effect = e;
+    }
+    
+    Volume() {
+    }
+    
+    void draw(){
+        switch(ans) {
+                case 0:
+                    image(vol_up, x, y, size, size);
+                    break;
+                
+                case 1:
+                    image(vol_left, x, y, size, size);
+                    break;
+                
+                case 2:
+                    image(vol_down, x, y, size, size);
+                    break;
+                
+                case 3:
+                    image(vol_right, x, y, size, size);
+                    break;
+            }
+    }
+    
+}
+
+class Arrow extends Beat {
+    static final int chk_x = 400;
+    static final int chk_y = 700;
+    static final int up = 0;
+    static final int left = 1;
+    static final int down = 2;
+    static final int right = 3;
+    
+    Arrow(int t, int e) {
+        ans = int(random(4));
+        y = chk_y;
+        x = width;         
+        time = t;
+        effect = e;
+    }
+    
+    Arrow() {
+    }
+    
+    void draw(){
+        switch(ans) {
+                case 0:
+                    image(arr_up, x, y, size, size);
+                    break;
+                
+                case 1:
+                    image(arr_left, x, y, size, size);
+                    break;
+                
+                case 2:
+                    image(arr_down, x, y, size, size);
+                    break;
+                
+                case 3:
+                    image(arr_right, x, y, size, size);
+                    break;
+            }
+    }
+}
+
+class Rank {
+    public int counter = 0;
+    public int rank;
+    static final int x_size = 400;
+    static final int y_size = 250;
+    static final int bad = 1;
+    static final int normal = 2;
+    static final int excellent = 3;
+    
+    Rank(int e) {
+        rank = e;
         counter = 15;
-        if(e == 2) {
-            if(is_bonus)
-                score += 20;
-            else
-                score += 10;
+        if(e == normal) {
+            if(game.is_bonus) {
+                values.score += 20;
+            }
+            else {
+                values.score += 10;
+            }
         }
-        else if(e == 3) {
-            if(is_bonus)
-                score += 40;
-            else
-                score += 20;
+        else if(e == excellent) {
+            if(game.is_bonus) {
+                values.score += 40;
+            }
+            else {
+                values.score += 20;
+            }
         }
     }
     
+    Rank() {
+    }
+      
     void draw() {
         if(counter > 0) {
-            switch(eval) {
-            case 1:
-                image(bad, 1350, 100);
+            switch(rank) {
+            case bad:
+                image(bad_img, x_size, y_size);
                 break;
                 
-            case 2:
-                image(normal, 1350, 100);
+            case normal:
+                image(normal_img, x_size, y_size);
                 break;
                 
-            case 3:
-                image(excellent, 1350, 100);
+            case excellent:
+                image(excellent_img, x_size, y_size);
                 break;
                 
             default:
@@ -118,69 +158,59 @@ class Evaluate {
     }   
 }
 
-boolean is_standby = true;
-boolean is_bonus = true;
+class Value {
+    static final int x = 400;
+    static final int y = 75;
+    int score = 0;
+    int combo = 0;
+    
+    void draw() {
+        fill(0);
+        textSize(48);
+        text(score, x, y);
+            if(combo > 0) {
+            text(combo + " combo", 150, 400);
+        }
+    }
+}
+
+class Game {
+    public boolean is_standby = true;
+    public boolean is_bonus = true;
+    public int start_time = 0; 
+    static final int fps = 144;  
+    static final int w = 1600; 
+    static final int h = 900;
+    static final int distance = 1200;
+    static final float speed = 1200.0;
+    int vol_chk = 0;
+}
 
 PImage backgnd_img1, backgnd_img2, logo, bonus;
-PImage up_up, up_left, up_down, up_right;
-PImage down_up, down_left, down_down, down_right, down_middle;
-PImage bad, normal, excellent;
-
-int start_time = 0;
-
-int score = 0;
-int combo = 0;
-
-int curr_cursor = 0;
+PImage vol_up, vol_left, vol_down, vol_right;
+PImage arr_up, arr_left, arr_down, arr_right;
+PImage arr_up_op, arr_left_op, arr_down_op, arr_right_op, arr_null_op;
+PImage bad_img, normal_img, excellent_img;
 
 int frame = 0;
 int fps_time = 0;
 int frame_1_sec = 0;
 
-final int fps = 40;
-final int cursor_speed = 1000;
-final int cursor_step = 30;
-
-Evaluate evaluation;
+Rank rank;
 BufferedReader reader;
-LinkedList<Cursor> beatmap = new LinkedList<Cursor>();
-LinkedList<Cursor> up_queue = new LinkedList<Cursor>();
-LinkedList<Cursor> down_queue = new LinkedList<Cursor>();
+//LinkedList<Beat> beatmap = new LinkedList<Beat>();
+LinkedList<Volume> vol_queue = new LinkedList<Volume>();
+LinkedList<Arrow> arr_queue = new LinkedList<Arrow>();
+LinkedList<Volume> vol_beatmap = new LinkedList<Volume>();
+LinkedList<Arrow> arr_beatmap = new LinkedList<Arrow>();
 
 Serial port;
 Minim minim;  //music obj
 AudioPlayer player = null; //music player obj
 AudioPlayer up_sound = null;
 AudioPlayer down_sound = null;
-
-void img_init() {
-    try {
-        imageMode(CENTER);
-        backgnd_img2 = loadImage("background.png"); //Make a beautiful background-image
-        logo = loadImage("logo.png");  //Make a beautiful logo image  
-        bonus = loadImage("bonus.png");
-        backgnd_img1 = loadImage("background_1.png");
-        backgnd_img2 = loadImage("background_2.png"); 
-        
-        up_up = loadImage("up_up2.png");
-        up_left = loadImage("up_left2.png");
-        up_down = loadImage("up_down2.png");
-        up_right = loadImage("up_right2.png");
-        
-        down_up = loadImage("down_up3.png");
-        down_left = loadImage("down_left3.png");
-        down_down = loadImage("down_down3.png");
-        down_right = loadImage("down_right3.png");
-        
-        bad = loadImage("bad.png");
-        normal = loadImage("normal.png");
-        excellent = loadImage("excellent.png");
-    }
-    catch(Exception e) {
-        println("Please check your png file integration");
-        retry();
-    }
-}
+Value values;
+Game game;
 
 void port_init() {
     try {
@@ -192,46 +222,8 @@ void port_init() {
     }
 }
 
-void sound_init() {
-    minim = new Minim(this);
-    player = minim.loadFile("g_major_cut.mp3", 2048); //(filename, buffersize);
-    up_sound = minim.loadFile("up_sound.wav");
-    down_sound = minim.loadFile("down_sound.wav");
-}
-
-void beatmap_load() {
-    String line;
-    while(true) {
-        try {
-            line = reader.readLine();             
-        }
-        catch(IOException e) {
-            e.printStackTrace();
-            line = null;
-        }
-        if(line == null) {
-            break;
-        }
-        String[] data = split(line, ',');       
-        Cursor obj = new Cursor(int(data[1]), int(data[2]));
-        beatmap.add(obj);
-    }
-}
-
-void beatmap_init() {
-    try {
-        reader = createReader("g_major.csv");
-    }
-    catch(Exception e) {
-        println("Please check your beatmap file");
-        e.printStackTrace();
-    }
-    beatmap_load();
-    
-}
-
 void draw_background() {
-    if(is_standby) {  //standby page         
+    if(game.is_standby) {  //standby page         
         background(backgnd_img1);                    
         String any_key = "Please key ENTER to start!";
         fill(#FFFFFF);
@@ -242,164 +234,159 @@ void draw_background() {
     
     else {      //gaming page
         background(backgnd_img2);
-        if(is_bonus) {
+        if(game.is_bonus) {
             image(bonus, 800, 100);            
         }                   
     }
 }
 
 void draw_cursor() {
-    switch(curr_cursor) {
-        case 0:
-            image(up_up, 400, 450, 200, 200); 
+    switch(game.vol_chk) {
+        case Volume.up:
+            image(vol_up, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
             break;
             
-        case 1:
-            image(up_left, 400, 450, 200, 200); 
+        case Volume.left:
+            image(vol_left, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
             break; 
             
-        case 2:
-            image(up_down, 400, 450, 200, 200); 
+        case Volume.down:
+            image(vol_down, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
             break;
         
-        case 3:
-            image(up_right, 400, 450, 200, 200); 
+        case Volume.right:
+            image(vol_right, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
             break; 
             
         default:
-            image(up_up, 400, 450, 200, 200); 
+            image(vol_up, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
             break;
     }
     
-    for(int i = 0; i < up_queue.size(); i++) {
-        up_queue.get(i).draw();
+    if(arr_queue.size() > 0) {
+        switch(arr_queue.element().ans) {
+          case Arrow.up:
+              image(arr_up_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size); 
+              break;
+              
+          case Arrow.left:
+              image(arr_left_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size); 
+              break; 
+              
+          case Arrow.down:
+              image(arr_down_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size); 
+              break;
+          
+          case Arrow.right:
+              image(arr_right_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size); 
+              break;            
+        }
+    }
+    else {
+        image(arr_null_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size);
     }
     
-    for(int i = 0; i < down_queue.size(); i++) {
-        down_queue.get(i).draw();
+    for(int i = 0; i < vol_queue.size(); i++) {
+        vol_queue.get(i).draw();
+    }
+    
+    for(int i = 0; i < arr_queue.size(); i++) {
+        arr_queue.get(i).draw();
     }
 }
 
-void move_cursor() {                        //move all cursor
-    for(int i = 0; i < up_queue.size(); i++) {         
-        up_queue.get(i).move();
+void move_beat() {                        //move all cursor
+    for(int i = 0; i < vol_queue.size(); i++) {         
+        vol_queue.get(i).move();
     }
     
-    for(int i = 0; i < down_queue.size(); i++) {        
-        down_queue.get(i).move();
+    for(int i = 0; i < arr_queue.size(); i++) {        
+        arr_queue.get(i).move();
     }
     
-    if(up_queue.size() > 0) {
-        if(up_queue.element().x <= 400) {
-            if(up_queue.element().ans != curr_cursor) {  //remove up cursors
-                evaluation = new Evaluate(1);
-                combo = 0;
+    if(vol_queue.size() > 0) {
+        if(vol_queue.element().x <= Volume.chk_x) {
+            if(vol_queue.element().ans != game.vol_chk) {  
+                rank = new Rank(Rank.bad);
+                values.combo = 0;
             }
             else {
-                evaluation = new Evaluate(3);
+                rank = new Rank(Rank.excellent);
                 up_sound.rewind();
                 up_sound.play();               
-                combo++;
+                values.combo++;
             }
-            up_queue.remove();
+            vol_queue.remove();
         }
     }
     
-    if(down_queue.size() > 0) {                 //remove down cursors         
-        if(down_queue.element().x <= 100) {
-            down_queue.remove();
-            evaluation = new Evaluate(1);
-            combo = 0;
+    if(arr_queue.size() > 0) {                        
+        if(arr_queue.element().x < Arrow.chk_x - Beat.size / 2) {
+            arr_queue.remove();
+            rank = new Rank(Rank.bad);
+            values.combo = 0;
         }
-    }
-}
-
-void draw_score() {
-    //println(score);
-    fill(0);
-    textSize(48);
-    text(score, 400, 75);
-    if(combo > 0) {
-        text(combo + " combo", 400, 175);
     }
 }
 
 void chk_down_res(int res) {
-    if(down_queue.size()>0) {  //not sensitive at all!
-        if(down_queue.element().x < 550 && down_queue.element().x > 250) {
-            if(down_queue.element().ans == res) {
-                down_queue.remove();
-                evaluation = new Evaluate(3);
-                combo++;
+    if(arr_queue.size()>0) {  //not sensitive at all!
+        if(abs(arr_queue.element().time - (millis() - game.start_time)) < 50 && abs(arr_queue.element().x - Arrow.chk_x) <= Beat.size / 2) {
+            if(arr_queue.element().ans == res) {
+                arr_queue.remove();
+                rank = new Rank(Rank.excellent);
+                values.combo++;
             }
             else {
-                down_queue.remove();
-                evaluation = new Evaluate(1);
-                combo = 0;
+                arr_queue.remove();
+                rank = new Rank(Rank.bad);
+                values.combo = 0;
             }       
         }         
-        else if(down_queue.element().x < 700 && down_queue.element().x > 100) {
-            if(down_queue.element().ans == res){
-                down_queue.remove();
-                evaluation = new Evaluate(2);
-                combo++;
+        else if(abs(arr_queue.element().time - (millis() - game.start_time)) < 100 && abs(arr_queue.element().x - Arrow.chk_x) <= Beat.size / 2) {
+            if(arr_queue.element().ans == res) {
+                arr_queue.remove();
+                rank = new Rank(Rank.normal);
+                values.combo++;
             }
             else {
-                down_queue.remove();
-                evaluation = new Evaluate(1);
-                combo = 0;
+                arr_queue.remove();
+                rank = new Rank(Rank.bad);
+                values.combo = 0;
             }
         }        
     } 
 }
 
 void update_queue() {
-    if(beatmap.size() != 0) {
-        if(beatmap.element().time - (millis() - start_time) <= cursor_speed) {   //From side to check point taking one second
-            if(beatmap.element().type == 0) {
-                up_queue.add(beatmap.remove());
-            }
-            else if(beatmap.element().type == 1) {
-                down_queue.add(beatmap.remove());
-            }
+    if(vol_beatmap.size() != 0) {
+        if(vol_beatmap.element().time - (millis() - game.start_time) <= Game.speed) {   //From side to check point taking one second
+            vol_queue.add(vol_beatmap.remove());
         }
+    }
+    if(arr_beatmap.size() != 0) {
+       if(arr_beatmap.element().time - (millis() - game.start_time) <= Game.speed) {   //From side to check point taking one second
+          arr_queue.add(arr_beatmap.remove());
+       }
     }                  
 }
 
 void retry() {
-    //port.stop();
-    //minim.stop();
-    combo = 0;
-    score = 0;
+    values.combo = 0;
+    values.score = 0;
     player.pause();
     player.rewind();
-    beatmap.clear();
-    up_queue.clear();
-    down_queue.clear();
-    evaluation = new Evaluate(4);
+    vol_beatmap.clear();
+    arr_beatmap.clear();
+    vol_queue.clear();
+    arr_queue.clear();
+    rank = new Rank();
     beatmap_init();
 } 
 
 void read_port() {
     if(port.available() > 0) {
-        int val = port.read();
-        switch(val) {
-            case '8':
-                curr_cursor = 0;
-                break;
-        
-            case '4':
-                curr_cursor = 1;
-                break;
-                
-            case '2':
-                curr_cursor = 2;
-                break;
-                
-            case '6':
-                curr_cursor = 3;
-                break;
-        }
+        //int val = port.read();
     }
 }
  
@@ -440,25 +427,25 @@ void keyReleased() {
 void keyPressed() {
     switch(keyCode){
         case UP:
-            chk_down_res(0);
+            chk_down_res(Arrow.up);
             down_sound.rewind();
             down_sound.play(); 
             break; 
             
         case LEFT:
-            chk_down_res(1);
+            chk_down_res(Arrow.left);
             down_sound.rewind();
             down_sound.play(); 
             break;   
             
         case DOWN:
-            chk_down_res(2);
+            chk_down_res(Arrow.down);
             down_sound.rewind();
             down_sound.play(); 
             break;   
             
         case RIGHT:
-            chk_down_res(3);
+            chk_down_res(Arrow.right);
             down_sound.rewind();
             down_sound.play(); 
             break;        
@@ -466,57 +453,132 @@ void keyPressed() {
     
     switch(key) {
         case 'q':
-            is_standby = true;
+            game.is_standby = true;
             retry();
             break;
                        
         case '8':
-            curr_cursor = 0;
+            game.vol_chk = Volume.up;
             break;
             
         case '4':
-            curr_cursor = 1;
+            game.vol_chk = Volume.left;
             break;
             
         case '2':
-            curr_cursor = 2;
+            game.vol_chk = Volume.down;
             break;
             
         case '6':
-            curr_cursor = 3;
+            game.vol_chk = Volume.right;
             break;
             
         case '\n':
-            if(is_standby) {
-                is_standby = false;
-                start_time = millis();
+            if(game.is_standby) {
+                game.is_standby = false;
+                game.start_time = millis();
             }
             break;
     }   
 }
 
-void setup() {
-    //port_init();
+void sound_init() {
+        minim = new Minim(this);
+        player = minim.loadFile("g_major_cut.mp3", 2048); //(filename, buffersize);
+        up_sound = minim.loadFile("up_sound.wav");
+        down_sound = minim.loadFile("down_sound.wav");
+    }
+
+void img_init() {
+    try {
+        imageMode(CENTER);
+        backgnd_img2 = loadImage("background.png"); //Make a beautiful background-image
+        logo = loadImage("logo.png");  //Make a beautiful logo image  
+        bonus = loadImage("bonus.png");
+        backgnd_img1 = loadImage("background_1.png");
+        backgnd_img2 = loadImage("background_3.png"); 
+        
+        vol_up = loadImage("vol_up.png");
+        vol_left = loadImage("vol_left.png");
+        vol_down = loadImage("vol_down.png");
+        vol_right = loadImage("vol_right.png");
+        
+        arr_up = loadImage("arr_up.png");
+        arr_left = loadImage("arr_left.png");
+        arr_down = loadImage("arr_down.png");
+        arr_right = loadImage("arr_right.png");
+        
+        arr_up_op = loadImage("arr_up_op.png");
+        arr_left_op = loadImage("arr_left_op.png");
+        arr_down_op = loadImage("arr_down_op.png");
+        arr_right_op = loadImage("arr_right_op.png");
+        arr_null_op = loadImage("arr_null_op.png");
+        
+        bad_img = loadImage("bad.png");
+        normal_img = loadImage("normal.png");
+        excellent_img = loadImage("excellent.png");
+    }
+    catch(Exception e) {
+        println("Please check your png file integration");
+    }
+}
+   
+void beatmap_init() {
+    try {
+        reader = createReader("g_major.csv");
+    }
+    catch(Exception e) {
+        println("Please check your beatmap file");
+        e.printStackTrace();
+    }
+    String line;
+    while(true) {
+        try {
+            line = reader.readLine();             
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+            line = null;
+        }
+        if(line == null) {
+            break;
+        }
+        String[] data = split(line, ',');
+        if(int(data[1]) == 0) {
+            Volume obj = new Volume(int(data[2]), 0);
+            vol_beatmap.add(obj);
+        }
+        else {
+            Arrow obj = new Arrow(int(data[2]), 0);
+            arr_beatmap.add(obj);
+        }
+    }   
+}
+
+void setup() {   
+    game = new Game();
+    rank = new Rank();   
+    values = new Value();
     img_init();
-    sound_init(); 
     beatmap_init();
+    sound_init();
+    //port_init();
     size(1600, 900);
-    frameRate(fps);  //Now it reached 40 FPS
-    evaluation = new Evaluate(4);   //initalize score obj
+    frameRate(Game.fps);  //Now it reached 40 FPS    
     //Start a thread
 }
 
 void draw() {  //main function of this program        
     draw_background();
-    if(!is_standby) {    //gaming mode
-        update_queue();
-        move_cursor();                    
-        draw_cursor();                
-        draw_true_fps();
-        evaluation.draw();
-        draw_score();              
-        draw_fps();
+    if(!game.is_standby) {    //gaming mode
+        update_queue(); 
+        move_beat();
         player.play();      
-        //read_port();   
-    }    
+        //read_port(); 
+        //draw_true_fps();
+        draw_cursor(); 
+        values.draw();
+        rank.draw();
+    } 
+    draw_fps();
 }
