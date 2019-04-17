@@ -5,7 +5,7 @@ import ddf.minim.*;
 import java.util.LinkedList;
 
 class Beat {
-    static final int size = 200;
+    static final int SIZE = 200;
     public int x;
     public int y;
     public int ans;
@@ -16,24 +16,24 @@ class Beat {
     }
        
     void move() {
-        x = width - int((Game.distance / Game.speed) * ((millis() - game.start_time) - (time - Game.speed)));
+        x = width - int((DISTANCE / SPEED) * ((millis() - start_time) - (time - SPEED)));
     }
 } 
 
 class Volume extends Beat {
-    static final int chk_x = 400;
-    static final int chk_y = 450;
-    static final int up = 0;
-    static final int left = 1;
-    static final int down = 2;
-    static final int right = 3;
+    static final int CHK_X = 400;
+    static final int CHK_Y = 450;
+    static final int UP = 0;
+    static final int LEFT = 1;
+    static final int DOWN = 2;
+    static final int RIGHT = 3;
     
     Volume(int t, int e) {
         x = width;         
         time = t;
         ans = int(random(4));
         ans = 0;
-        y = chk_y;  
+        y = CHK_Y;  
         effect = e;
     }
     
@@ -43,36 +43,35 @@ class Volume extends Beat {
     void draw(){
         switch(ans) {
                 case 0:
-                    image(vol_up, x, y, size, size);
+                    image(vol_up, x, y, SIZE, SIZE);
                     break;
                 
                 case 1:
-                    image(vol_left, x, y, size, size);
+                    image(vol_left, x, y, SIZE, SIZE);
                     break;
                 
                 case 2:
-                    image(vol_down, x, y, size, size);
+                    image(vol_down, x, y, SIZE, SIZE);
                     break;
                 
                 case 3:
-                    image(vol_right, x, y, size, size);
+                    image(vol_right, x, y, SIZE, SIZE);
                     break;
-            }
+        }
     }
-    
 }
 
 class Arrow extends Beat {
-    static final int chk_x = 400;
-    static final int chk_y = 700;
-    static final int up = 0;
-    static final int left = 1;
-    static final int down = 2;
-    static final int right = 3;
+    static final int CHK_X = 400;
+    static final int CHK_Y = 700;
+    static final int UP = 0;
+    static final int LEFT = 1;
+    static final int DOWN = 2;
+    static final int RIGHT = 3;
     
     Arrow(int t, int e) {
         ans = int(random(4));
-        y = chk_y;
+        y = CHK_Y;
         x = width;         
         time = t;
         effect = e;
@@ -84,19 +83,19 @@ class Arrow extends Beat {
     void draw(){
         switch(ans) {
                 case 0:
-                    image(arr_up, x, y, size, size);
+                    image(arr_up, x, y, SIZE, SIZE);
                     break;
                 
                 case 1:
-                    image(arr_left, x, y, size, size);
+                    image(arr_left, x, y, SIZE, SIZE);
                     break;
                 
                 case 2:
-                    image(arr_down, x, y, size, size);
+                    image(arr_down, x, y, SIZE, SIZE);
                     break;
                 
                 case 3:
-                    image(arr_right, x, y, size, size);
+                    image(arr_right, x, y, SIZE, SIZE);
                     break;
             }
     }
@@ -105,25 +104,25 @@ class Arrow extends Beat {
 class Rank {
     public int counter = 0;
     public int rank;
-    static final int x_size = 400;
-    static final int y_size = 250;
-    static final int bad = 1;
-    static final int normal = 2;
-    static final int excellent = 3;
+    static final int SIZE_X = 400;
+    static final int SIZE_Y = 250;
+    static final int BAD = 1;
+    static final int NORMAL = 2;
+    static final int EXCELLENT = 3;
     
     Rank(int e) {
         rank = e;
         counter = 15;
-        if(e == normal) {
-            if(game.is_bonus) {
+        if(e == NORMAL) {
+            if(is_bonus) {
                 values.score += 20;
             }
             else {
                 values.score += 10;
             }
         }
-        else if(e == excellent) {
-            if(game.is_bonus) {
+        else if(e == EXCELLENT) {
+            if(is_bonus) {
                 values.score += 40;
             }
             else {
@@ -138,16 +137,16 @@ class Rank {
     void draw() {
         if(counter > 0) {
             switch(rank) {
-            case bad:
-                image(bad_img, x_size, y_size);
+            case BAD:
+                image(bad_img, SIZE_X, SIZE_Y);
                 break;
                 
-            case normal:
-                image(normal_img, x_size, y_size);
+            case NORMAL:
+                image(normal_img, SIZE_X, SIZE_Y);
                 break;
                 
-            case excellent:
-                image(excellent_img, x_size, y_size);
+            case EXCELLENT:
+                image(excellent_img, SIZE_X, SIZE_Y);
                 break;
                 
             default:
@@ -159,38 +158,43 @@ class Rank {
 }
 
 class Value {
-    static final int x = 400;
-    static final int y = 75;
+    static final int X = 400;
+    static final int Y = 75;
     int score = 0;
     int combo = 0;
     
     void draw() {
         fill(0);
         textSize(48);
-        text(score, x, y);
+        text(score, X, Y);
             if(combo > 0) {
             text(combo + " combo", 150, 400);
         }
     }
 }
 
-class Game {
-    public boolean is_standby = true;
-    public boolean is_bonus = true;
-    public int start_time = 0; 
-    static final int fps = 144;  
-    static final int w = 1600; 
-    static final int h = 900;
-    static final int distance = 1200;
-    static final float speed = 1200.0;
-    int vol_chk = 0;
+class Sound {
+    static final int bass = 0;
+    static final int middle = 1;
+    static final int treble = 2;
+    static final int cymbal = 3;   
 }
+
+static final int FPS = 60;  
+static final int DISTANCE = 1200;
+static final float SPEED = 1000.0;
 
 PImage backgnd_img1, backgnd_img2, logo, bonus;
 PImage vol_up, vol_left, vol_down, vol_right;
 PImage arr_up, arr_left, arr_down, arr_right;
 PImage arr_up_op, arr_left_op, arr_down_op, arr_right_op, arr_null_op;
 PImage bad_img, normal_img, excellent_img;
+
+public boolean is_standby = true;
+public boolean is_bonus = true;
+public int start_time = 0; 
+
+int vol_chk = 0;
 
 int frame = 0;
 int fps_time = 0;
@@ -207,10 +211,9 @@ LinkedList<Arrow> arr_beatmap = new LinkedList<Arrow>();
 Serial port;
 Minim minim;  //music obj
 AudioPlayer player = null; //music player obj
-AudioPlayer up_sound = null;
-AudioPlayer down_sound = null;
+AudioPlayer hihat_cymbal = null;
+AudioPlayer middle = null, cymbal = null, bass = null, treble = null;
 Value values;
-Game game;
 
 void port_init() {
     try {
@@ -223,7 +226,7 @@ void port_init() {
 }
 
 void draw_background() {
-    if(game.is_standby) {  //standby page         
+    if(is_standby) {  //standby page         
         background(backgnd_img1);                    
         String any_key = "Please key ENTER to start!";
         fill(#FFFFFF);
@@ -234,56 +237,56 @@ void draw_background() {
     
     else {      //gaming page
         background(backgnd_img2);
-        if(game.is_bonus) {
+        if(is_bonus) {
             image(bonus, 800, 100);            
         }                   
     }
 }
 
-void draw_cursor() {
-    switch(game.vol_chk) {
-        case Volume.up:
-            image(vol_up, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
+void draw_beat() {
+    switch(vol_chk) {
+        case Volume.UP:
+            image(vol_up, Volume.CHK_X, Volume.CHK_Y, Volume.SIZE, Volume.SIZE); 
             break;
             
-        case Volume.left:
-            image(vol_left, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
+        case Volume.LEFT:
+            image(vol_left, Volume.CHK_X, Volume.CHK_Y, Volume.SIZE, Volume.SIZE); 
             break; 
             
-        case Volume.down:
-            image(vol_down, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
+        case Volume.DOWN:
+            image(vol_down, Volume.CHK_X, Volume.CHK_Y, Volume.SIZE, Volume.SIZE); 
             break;
         
-        case Volume.right:
-            image(vol_right, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
+        case Volume.RIGHT:
+            image(vol_right, Volume.CHK_X, Volume.CHK_Y, Volume.SIZE, Volume.SIZE); 
             break; 
             
         default:
-            image(vol_up, Volume.chk_x, Volume.chk_y, Volume.size, Volume.size); 
+            image(vol_up, Volume.CHK_X, Volume.CHK_Y, Volume.SIZE, Volume.SIZE); 
             break;
     }
     
     if(arr_queue.size() > 0) {
         switch(arr_queue.element().ans) {
-          case Arrow.up:
-              image(arr_up_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size); 
+          case Arrow.UP:
+              image(arr_up_op, Arrow.CHK_X, Arrow.CHK_Y, Arrow.SIZE, Arrow.SIZE); 
               break;
               
-          case Arrow.left:
-              image(arr_left_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size); 
+          case Arrow.LEFT:
+              image(arr_left_op, Arrow.CHK_X, Arrow.CHK_Y, Arrow.SIZE, Arrow.SIZE); 
               break; 
               
-          case Arrow.down:
-              image(arr_down_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size); 
+          case Arrow.DOWN:
+              image(arr_down_op, Arrow.CHK_X, Arrow.CHK_Y, Arrow.SIZE, Arrow.SIZE); 
               break;
           
-          case Arrow.right:
-              image(arr_right_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size); 
+          case Arrow.RIGHT:
+              image(arr_right_op, Arrow.CHK_X, Arrow.CHK_Y, Arrow.SIZE, Arrow.SIZE); 
               break;            
         }
     }
     else {
-        image(arr_null_op, Arrow.chk_x, Arrow.chk_y, Arrow.size, Arrow.size);
+        image(arr_null_op, Arrow.CHK_X, Arrow.CHK_Y, Arrow.SIZE, Arrow.SIZE);
     }
     
     for(int i = 0; i < vol_queue.size(); i++) {
@@ -305,15 +308,14 @@ void move_beat() {                        //move all cursor
     }
     
     if(vol_queue.size() > 0) {
-        if(vol_queue.element().x <= Volume.chk_x) {
-            if(vol_queue.element().ans != game.vol_chk) {  
-                rank = new Rank(Rank.bad);
+        if(vol_queue.element().x <= Volume.CHK_X) {
+            if(vol_queue.element().ans != vol_chk) {  
+                rank = new Rank(Rank.BAD);
                 values.combo = 0;
             }
-            else {
-                rank = new Rank(Rank.excellent);
-                up_sound.rewind();
-                up_sound.play();               
+            else {                
+                rank = new Rank(Rank.EXCELLENT);
+                play_effect(vol_queue.element().effect);              
                 values.combo++;
             }
             vol_queue.remove();
@@ -321,37 +323,39 @@ void move_beat() {                        //move all cursor
     }
     
     if(arr_queue.size() > 0) {                        
-        if(arr_queue.element().x < Arrow.chk_x - Beat.size / 2) {
+        if(arr_queue.element().x < Arrow.CHK_X - Beat.SIZE / 2) {
             arr_queue.remove();
-            rank = new Rank(Rank.bad);
+            rank = new Rank(Rank.BAD);
             values.combo = 0;
         }
     }
 }
 
-void chk_down_res(int res) {
-    if(arr_queue.size()>0) {  //not sensitive at all!
-        if(abs(arr_queue.element().time - (millis() - game.start_time)) < 50 && abs(arr_queue.element().x - Arrow.chk_x) <= Beat.size / 2) {
+void chk_arr_res(int res) {
+    if(arr_queue.size()>0) {  
+        if(abs(arr_queue.element().time - (millis() - start_time)) < 50 && abs(arr_queue.element().x - Arrow.CHK_X) <= Beat.SIZE / 2) {
             if(arr_queue.element().ans == res) {
+                play_effect(arr_queue.element().effect);
                 arr_queue.remove();
-                rank = new Rank(Rank.excellent);
+                rank = new Rank(Rank.EXCELLENT);
                 values.combo++;
             }
             else {
                 arr_queue.remove();
-                rank = new Rank(Rank.bad);
+                rank = new Rank(Rank.BAD);
                 values.combo = 0;
             }       
         }         
-        else if(abs(arr_queue.element().time - (millis() - game.start_time)) < 100 && abs(arr_queue.element().x - Arrow.chk_x) <= Beat.size / 2) {
+        else if(abs(arr_queue.element().time - (millis() - start_time)) < 100 && abs(arr_queue.element().x - Arrow.CHK_X) <= Beat.SIZE / 2) {
             if(arr_queue.element().ans == res) {
+                play_effect(arr_queue.element().effect);
                 arr_queue.remove();
-                rank = new Rank(Rank.normal);
+                rank = new Rank(Rank.NORMAL);
                 values.combo++;
             }
             else {
                 arr_queue.remove();
-                rank = new Rank(Rank.bad);
+                rank = new Rank(Rank.BAD);
                 values.combo = 0;
             }
         }        
@@ -360,12 +364,12 @@ void chk_down_res(int res) {
 
 void update_queue() {
     if(vol_beatmap.size() != 0) {
-        if(vol_beatmap.element().time - (millis() - game.start_time) <= Game.speed) {   //From side to check point taking one second
+        if(vol_beatmap.element().time - (millis() - start_time) <= SPEED) {   //From side to check point taking one second
             vol_queue.add(vol_beatmap.remove());
         }
     }
     if(arr_beatmap.size() != 0) {
-       if(arr_beatmap.element().time - (millis() - game.start_time) <= Game.speed) {   //From side to check point taking one second
+       if(arr_beatmap.element().time - (millis() - start_time) <= SPEED) {   //From side to check point taking one second
           arr_queue.add(arr_beatmap.remove());
        }
     }                  
@@ -427,67 +431,64 @@ void keyReleased() {
 void keyPressed() {
     switch(keyCode){
         case UP:
-            chk_down_res(Arrow.up);
-            down_sound.rewind();
-            down_sound.play(); 
+            chk_arr_res(Arrow.UP);
             break; 
             
         case LEFT:
-            chk_down_res(Arrow.left);
-            down_sound.rewind();
-            down_sound.play(); 
+            chk_arr_res(Arrow.LEFT);
             break;   
             
         case DOWN:
-            chk_down_res(Arrow.down);
-            down_sound.rewind();
-            down_sound.play(); 
+            chk_arr_res(Arrow.DOWN);
             break;   
             
         case RIGHT:
-            chk_down_res(Arrow.right);
-            down_sound.rewind();
-            down_sound.play(); 
+            chk_arr_res(Arrow.RIGHT);
             break;        
     }
     
     switch(key) {
         case 'q':
-            game.is_standby = true;
+            is_standby = true;
             retry();
             break;
                        
         case '8':
-            game.vol_chk = Volume.up;
+            vol_chk = Volume.UP;
             break;
             
         case '4':
-            game.vol_chk = Volume.left;
+            vol_chk = Volume.LEFT;
             break;
             
         case '2':
-            game.vol_chk = Volume.down;
+            vol_chk = Volume.DOWN;
             break;
             
         case '6':
-            game.vol_chk = Volume.right;
+            vol_chk = Volume.RIGHT;
             break;
             
         case '\n':
-            if(game.is_standby) {
-                game.is_standby = false;
-                game.start_time = millis();
+            if(is_standby) {
+                is_standby = false;
+                start_time = millis();
             }
             break;
     }   
 }
 
+
+
 void sound_init() {
-        minim = new Minim(this);
-        player = minim.loadFile("g_major_cut.mp3", 2048); //(filename, buffersize);
-        up_sound = minim.loadFile("up_sound.wav");
-        down_sound = minim.loadFile("down_sound.wav");
-    }
+    minim = new Minim(this);
+    player = minim.loadFile("g_major_cut.mp3", 2048); //(filename, bufferSIZE);
+    hihat_cymbal = minim.loadFile("hihat_cymbal.wav");
+    middle = minim.loadFile("middle.wav");
+    cymbal = minim.loadFile("cymbal.wav");
+    bass = minim.loadFile("bass.wav");
+    treble = minim.loadFile("treble.wav");
+}
 
 void img_init() {
     try {
@@ -545,18 +546,41 @@ void beatmap_init() {
         }
         String[] data = split(line, ',');
         if(int(data[1]) == 0) {
-            Volume obj = new Volume(int(data[2]), 0);
-            vol_beatmap.add(obj);
+            Volume vol = new Volume(int(data[2]), int(data[3]));
+            vol_beatmap.add(vol);
         }
         else {
-            Arrow obj = new Arrow(int(data[2]), 0);
-            arr_beatmap.add(obj);
+            Arrow arr = new Arrow(int(data[2]), int(data[3]));
+            arr_beatmap.add(arr);
         }
     }   
 }
 
+void play_effect(int s) {
+    switch(s) {
+        case Sound.bass:
+            bass.rewind();
+            bass.play();
+            break;
+        
+        case Sound.middle: 
+            middle.rewind();
+            middle.play();
+            break;
+            
+        case Sound.treble:
+            treble.rewind();
+            treble.play();
+            break;
+         
+        case Sound.cymbal:
+            cymbal.rewind();
+            cymbal.play();
+            break;          
+    }
+}
+
 void setup() {   
-    game = new Game();
     rank = new Rank();   
     values = new Value();
     img_init();
@@ -564,21 +588,21 @@ void setup() {
     sound_init();
     //port_init();
     size(1600, 900);
-    frameRate(Game.fps);  //Now it reached 40 FPS    
+    frameRate(FPS);  
     //Start a thread
 }
 
 void draw() {  //main function of this program        
     draw_background();
-    if(!game.is_standby) {    //gaming mode
+    draw_fps();
+    if(!is_standby) {    //gaming mode
         update_queue(); 
         move_beat();
         player.play();      
         //read_port(); 
         //draw_true_fps();
-        draw_cursor(); 
+        draw_beat(); 
         values.draw();
         rank.draw();
     } 
-    draw_fps();
 }
