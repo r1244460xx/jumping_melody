@@ -7,7 +7,10 @@ import java.util.LinkedList;
 class Beat {
     static final int SIZE = 200;
     static final int DISTANCE = 1200;
-    static final float SPEED = 1200.0;
+    static final float FAST = 1000.0;
+    static final float MIDDLE = 1500.0;
+    static final float SLOW = 2000.0;
+    float speed = MIDDLE;
     public int x;
     public int y;
     public int ans;
@@ -17,7 +20,7 @@ class Beat {
     }
        
     void move() {
-        x = int(width - (DISTANCE / SPEED) * ((millis() - game.start_time) - (time - SPEED)));
+       x = width - int((DISTANCE / speed) * ((millis() - game.start_time) - (time - speed)));
     }
 } 
 
@@ -33,6 +36,7 @@ class Volume extends Beat {
         x = width;         
         time = t;
         ans = int(random(4));
+        if(ans == 2) ans = 0;
         ans = 0;
         y = CHK_Y;  
         effect = e;
@@ -116,7 +120,7 @@ class Rank {
         }
         rank = e;
         if(e == NORMAL) {
-            if(is_bonus) {
+            if(game.is_bonus) {
                 values.score += 20;
             }
             else {
@@ -124,7 +128,7 @@ class Rank {
             }
         }
         else if(e == EXCELLENT) {
-            if(is_bonus) {
+            if(game.is_bonus) {
                 values.score += 40;
             }
             else {
@@ -159,7 +163,7 @@ class Rank {
 }
 
 class Value {
-    static final int X = 400;
+    static final int X = 50;
     static final int Y = 75;
     int score = 0;
     int combo = 0;
@@ -180,12 +184,13 @@ class Value {
     }
     
     void draw() {
-        fill(0);
+        fill(#FFFFFF);
         textSize(48);
+        textAlign(LEFT, CENTER);
+        text("SCORE: " + score, X, Y);
         textAlign(CENTER, CENTER);
-        text(score, X, Y);
         if(combo > 0) {
-            text(combo + " combo", 150, 400);
+            text(combo + " COMBO", 150, 700);
         }
     }
     
@@ -198,7 +203,7 @@ class Mode {
     static final int MENU = 1;
     static final int GAME = 2;
     static final int RESULT = 3;
-    int mode = MENU;
+    int mode = INTRO;
     
     Mode() {
     
@@ -225,18 +230,46 @@ class Mode {
 class Intro {
     static final int WORD_X = 800;
     static final int WORD_Y = 450;
-    
+    AudioPlayer intro;
+    int op = 0;
+    boolean op_f = true;
     Intro() {
+        intro = minim.loadFile("intro.mp3");
     }
     
     void draw() {
         background(backgnd_intro);                    
-        String any_key = "Please key ENTER to start!";
-        fill(#FFFFFF);
+        String any_key = "Please press JoyStick to start!";
+        if(op_f) {
+            op++;
+            if(op == 256) {
+                op_f = false;
+                op = 255;
+            }
+        }
+        else {
+            op--;
+            if(op == -1) {
+                op_f = true;
+                op = 0;
+            }
+        }
+        fill(#FFFFFF, op);
         textSize(80);
-        textAlign(CENTER, CENTER);
         text(any_key, WORD_X, WORD_Y); //Hope to create fading in out text
-    }    
+        fill(#FFFFFF);
+    }  
+    
+    void leave() {
+        intro.pause();
+        intro.rewind();
+    }
+    
+    void play() {
+        if(!intro.isPlaying()) {
+            intro.play();
+        }
+    }
 }
 
 class Menu {
@@ -288,13 +321,12 @@ class Menu {
             len = 7;
         }
         if(len > 0) {
-            fill(#FFFFFF);
+            fill(207, 169, 114);
             strokeWeight(10);
             strokeJoin(ROUND);
             rect(x, y, size_x, size_y);
             textSize(80);
-            textAlign(CENTER, CENTER);
-            fill(0);
+            fill(#FFFFFF);
             int index = song_ptr;
             text(song_list.get(index), x, y);
                           
@@ -303,10 +335,9 @@ class Menu {
                 size_y = 100;
                 x = width - size_x / 2;
                 y = 600 + (i - 1) * 100 + offset; 
-                fill(#FFFFFF);
+                fill(207, 169, 114);
                 rect(x, y, size_x, size_y);         
                 textSize(48);
-                textAlign(CENTER, CENTER);
                 fill(0);
                 index = (song_ptr + i) % len;
                 if(index < 0) {
@@ -320,11 +351,9 @@ class Menu {
                 size_y = 100;
                 x = width - size_x / 2;
                 y = 300 - (i - 1) * 100 - offset; 
-                fill(#FFFFFF);
-                rect(x, y, size_x, size_y);
-                
+                fill(207, 169, 114);
+                rect(x, y, size_x, size_y);          
                 textSize(48);
-                textAlign(CENTER, CENTER);
                 fill(0);
                 index = (song_ptr - i) % len;
                 if(index < 0) {
@@ -333,6 +362,23 @@ class Menu {
                 text(song_list.get(index), x, y);
             }           
         }
+        textAlign(LEFT, CENTER);
+        textSize(60);
+        fill(#FFFFFF);
+        String str = "";
+        switch(int(beat.speed)) {
+            case 1000:
+                str = "FAST";
+                break;
+            case 1500:
+                str = "MIDDLE";
+                break;
+            case 2000:
+                str = "SLOW";
+                break;
+        }
+        text("SPEED: " + str, 150, 475);
+        textAlign(CENTER, CENTER);
     }    
 }
 
@@ -349,14 +395,15 @@ class Game {
     int beated = 0;
     int end_timer = 0;
     int start_timer = 0;
-    
+    boolean is_bonus = false;
+    int bonus_start;
+    int bonus_end;
     AudioPlayer song;
     AudioPlayer middle = null, cymbal = null, bass = null, treble = null, hihat_cymbal = null;
     
     Game() {
         sound_init();
-        beatmap_init();
-        start_time = millis();
+        beatmap_init(); //<>//
         rank = new Rank();   
         values = new Value();
     }
@@ -398,12 +445,17 @@ class Game {
             if(int(data[1]) == 0) {
                 Volume vol = new Volume(int(data[2]), int(data[3]));
                 vol_beatmap.add(vol);
+                map_size++;
             }
-            else {
+            else if(int(data[1]) == 1) {
                 Arrow arr = new Arrow(int(data[2]), int(data[3]));
                 arr_beatmap.add(arr);
+                map_size++;
             }
-            map_size++;
+            else if(int(data[1]) == 3) {
+                bonus_start = int(data[2]);
+                bonus_end = int(data[3]);
+            }
         }   
     }
     
@@ -424,17 +476,24 @@ class Game {
         song.pause();
     }
     
-    void update_queue() {
-        if(vol_beatmap.size() != 0) {
-            if(vol_beatmap.element().time - (millis() - start_time) <= Beat.SPEED) {   
+    void update_queue() {   
+        while(vol_beatmap.size() > 0) {
+            if(vol_beatmap.element().time - (millis() - start_time) <= beat.speed * 2) {   
                 vol_queue.add(vol_beatmap.remove());
             }
-        }
-        if(arr_beatmap.size() != 0) {
-            if(arr_beatmap.element().time - (millis() - start_time) <= Beat.SPEED) {   
+            else {
+                break;
+            }
+        }       
+        while(arr_beatmap.size() > 0) {
+            if(arr_beatmap.element().time - (millis() - start_time) <= beat.speed * 2) {   
                 arr_queue.add(arr_beatmap.remove());
             }
-        }                  
+            else {
+                break;
+            }
+        }
+                          
     }
     
     void move_beat() {                      
@@ -447,7 +506,8 @@ class Game {
         }
         /*Check the answer of volume beat*/
         if(vol_queue.size() > 0) {
-            if(abs(vol_queue.element().time - (millis() - start_time)) <= 15) {
+            //if(abs(vol_queue.element().time - (millis() - start_time)) <= 15) {
+            if(abs(vol_queue.element().x - 400) <= 15) {
                 if(vol_queue.element().ans != vol_chk) {  
                     rank = new Rank(Rank.BAD);
                     values.combo_zero();
@@ -479,9 +539,8 @@ class Game {
         background(backgnd_game);
         if(is_bonus) {
             image(bonus, 800, 100);            
-        }
-        
-        switch(vol_chk) {
+        }     
+       /* switch(vol_chk) {
             case Volume.UP:
                 image(vol_up, Volume.CHK_X, Volume.CHK_Y, Volume.SIZE, Volume.SIZE); 
                 break;
@@ -501,7 +560,7 @@ class Game {
             default:
                 image(vol_up, Volume.CHK_X, Volume.CHK_Y, Volume.SIZE, Volume.SIZE); 
                 break;
-        }
+        }*/
         
         if(arr_queue.size() > 0) {
             switch(arr_queue.element().ans) {
@@ -609,6 +668,7 @@ class Game {
             }
             else {
                 if(millis() - end_timer > 3000) {
+                    game.leave();
                     mode.to_result();
                 }
             }
@@ -626,6 +686,14 @@ class Game {
         arr_queue.clear();
         game.beatmap_init();    
     } 
+    void bonus_chk() {
+        if(bonus_start <= (millis() - start_time)) {
+            is_bonus = true;
+        }
+        if(bonus_end <= (millis() - start_time)) {
+            is_bonus = false;
+        }
+    }
 }
 
 class Result {
@@ -636,10 +704,11 @@ class Result {
     }
        
     void draw() {
-        acc = (values.excel + values.normal) / game.map_size * 100.0;
+        acc = 100.0 * (values.excel + values.normal) / game.map_size;
+        acc = round(acc * 100.0);
+        acc /= 100.0;
         background(backgnd_result);
         fill(#FFFFFF);
-        textAlign(CENTER, CENTER);
         textSize(60);
         if(acc > 95.0) {
             image(rank_s, width / 2, height / 2, 370, 600);
@@ -659,7 +728,7 @@ class Result {
         image(score, width / 2 - 600, height * 3 / 4, 200, 100);
         text(values.score + "", width / 2 - 600, height * 3 / 4 + 70, 200, 100);
         image(accuracy, width / 2 - 360, height * 3 / 4, 200, 100);
-        text(acc + "", width / 2 - 360, height * 3 / 4 + 70, 200, 100);
+        text(acc + "%", width / 2 - 360, height * 3 / 4 + 70, 200, 100);
         image(combo, width / 2 - 120, height * 3 / 4, 200, 100);
         text(values.max_combo + "", width / 2 - 120, height * 3 / 4 + 70, 200, 100);
         image(excellent_img, width / 2 + 120, height * 3 / 4, 200, 100);
@@ -681,9 +750,6 @@ class Result {
 
 }
 
-public boolean is_bonus = true;
-
-
 int frame = 0;
 int fps_time = 0;
 int frame_1_sec = 0;
@@ -694,6 +760,7 @@ Intro intro;
 Menu menu;
 Game game;
 Result result;
+Beat beat;
 BufferedReader reader;
 
 LinkedList<Volume> vol_queue = new LinkedList<Volume>();
@@ -720,6 +787,13 @@ void read_port() {
     if(port.available() > 0) {
         int val = port.read();
         switch(mode.mode) {
+            case Mode.INTRO:
+                intro.play();
+                if(val == '8') {
+                    mode.to_menu();
+                    intro.leave();
+                }
+                break;
             case Mode.MENU:
                 switch(val){
                     case '0':
@@ -737,7 +811,25 @@ void read_port() {
                         break;   
                         
                     case '3':
-                        break;        
+                        break; 
+                    
+                    case '4':
+                        beat.speed = Beat.MIDDLE;
+                    break;
+                    
+                    case '5':
+                        beat.speed = Beat.FAST;
+                    break;
+                    
+                    case '7':
+                        beat.speed = Beat.SLOW;
+                    break;
+                       
+                    case '8':
+                        mode.to_game();
+                        menu.leave();
+                        game = new Game();
+                        break;                      
                 }
                 break;
                 
@@ -757,11 +849,28 @@ void read_port() {
                         
                     case '3':
                         game.chk_arr_res(Arrow.RIGHT);
-                        break;        
+                        break;  
+                    
+                    case '4':
+                        game.vol_chk = Volume.UP;
+                        break;
+                    
+                    case '5':
+                        game.vol_chk = Volume.LEFT;
+                        break;
+                        
+                    case '7':
+                        game.vol_chk = Volume.RIGHT;
+                        break;
                 }
                 break;
                 
             case Mode.RESULT:
+                if(val == '8') {
+                    result.leave();
+                    mode.to_menu();
+                    break;
+                }
                 break;
         }
     }
@@ -780,8 +889,7 @@ void draw_true_fps() {
 void draw_fps() {
     fill(#FFFFFF);
     textSize(32);
-    textAlign(CENTER, CENTER);
-    text("FPS: " + int(frameRate), 150, 850);
+    text("FPS: " + int(frameRate), 100, 850);
 }
 
 PImage backgnd_intro, backgnd_game, backgnd_result,logo, bonus;
@@ -790,6 +898,13 @@ PImage arr_up, arr_left, arr_down, arr_right;
 PImage arr_up_op, arr_left_op, arr_down_op, arr_right_op, arr_null_op;
 PImage bad_img, normal_img, excellent_img, combo, score, accuracy;
 PImage rank_d, rank_c, rank_b, rank_a, rank_s;
+PFont comic;
+
+void font_init() {
+    comic = createFont("Comic Sans MS.ttf", 48);
+    textFont(comic);
+    textAlign(CENTER, CENTER);
+}
 
 void img_init() {
     try {
@@ -833,6 +948,14 @@ void img_init() {
     }
 }
 
+void draw_time() {
+    if(game.start_time != 0) {
+        fill(#FFFFFF);
+        textSize(32);
+        text("Time: " + str(millis() - game.start_time), 300, 850);
+    }
+}
+
 void keyReleased() {
     switch(keyCode){
         case LEFT:
@@ -852,8 +975,10 @@ void keyReleased() {
 void keyPressed() {
     switch(mode.mode) {
         case Mode.INTRO:
+            intro.play();
             if(key == '\n') {
                 mode.to_menu();
+                intro.leave();
             }
             break;
             
@@ -882,19 +1007,19 @@ void keyPressed() {
                     mode.to_intro();
                     menu.leave();
                     break;
-                               
-                case '8':
-                    break;
-                    
+                                                   
                 case '4':
+                    beat.speed = Beat.MIDDLE;
                     break;
                     
-                case '2':
+                case '5':
+                    beat.speed = Beat.FAST;
                     break;
                     
-                case '6':
+                case '7':
+                    beat.speed = Beat.SLOW;
                     break;
-                    
+                   
                 case '\n':
                     mode.to_game();
                     menu.leave();
@@ -969,13 +1094,16 @@ void setup() {
     intro = new Intro();
     menu = new Menu();  
     result = new Result();
+    beat = new Beat();
     size(1600, 900, P3D);
     frameRate(80);   
-    img_init();        
+    img_init();     
+    font_init();
     //port_init();       
 }
 
 void draw() {  //main function of this program        
+    //read_port(); 
     switch(mode.mode){
         case Mode.INTRO:
             intro.draw();
@@ -983,25 +1111,30 @@ void draw() {  //main function of this program
             
         case Mode.MENU:
             menu.play();
-            //read_port();
             menu.draw();
             break;
          
         case Mode.GAME:
+            if(game.start_time == 0) {
+                game.start_time = millis();
+            }
+            if(!game.song.isPlaying()) {
+                game.play(); 
+            }
             game.update_queue(); 
-            game.move_beat();
-            game.play();      
-            //read_port(); 
+            game.move_beat();         
             game.draw(); 
             values.draw();
             rank.draw();
             game.chk_end();
+            draw_time();
+            game.bonus_chk();
             break;    
         
         case Mode.RESULT:
             result.play();
             result.draw();
             break;
-    } 
+    }
     draw_fps();
 }
