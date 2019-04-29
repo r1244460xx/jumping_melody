@@ -287,10 +287,8 @@ class Menu {
                     song_list.add(pieces[0]);
                 }
             }
-            
         }
         song_name = song_list.get(song_ptr);
-        println(song_name);
         song = minim.loadFile(song_name + ".mp3");
     }
     
@@ -774,12 +772,15 @@ Minim minim;  //music obj
 
 Value values;
 
+boolean serial_flag = true;
+
 void port_init() {
     try {
         port = new Serial(this, "COM3", 115200);
     }
     catch(Exception e) {
         println("Please check your serial connection");
+        serial_flag = false;
     }
 }
 
@@ -788,12 +789,12 @@ void read_port() {
         int val = port.read();
         switch(mode.mode) {
             case Mode.INTRO:
-                intro.play();
                 if(val == '8') {
                     mode.to_menu();
                     intro.leave();
                 }
                 break;
+                
             case Mode.MENU:
                 switch(val){
                     case '0':
@@ -975,7 +976,6 @@ void keyReleased() {
 void keyPressed() {
     switch(mode.mode) {
         case Mode.INTRO:
-            intro.play();
             if(key == '\n') {
                 mode.to_menu();
                 intro.leave();
@@ -1099,14 +1099,19 @@ void setup() {
     frameRate(80);   
     img_init();     
     font_init();
-    //port_init();       
+    port_init();       
 }
 
 void draw() {  //main function of this program        
-    //read_port(); 
+    if(serial_flag) {
+        read_port(); 
+    }  
     switch(mode.mode){
         case Mode.INTRO:
             intro.draw();
+            if(!intro.intro.isPlaying()) {
+                intro.play();
+            }
             break;
             
         case Mode.MENU:
